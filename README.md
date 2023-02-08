@@ -1,33 +1,43 @@
 # SKIPLI Coding Challenge
-**This is my project folder (I'm not really good at ExpressJS so I skip that part).**
+**This is my project folders: backend (Express JS + Twilio API) and myapp (React JS + Firebase SDK)**
+- **backend**:
+> **server.js**: the script sets up a server that listens on a specified port and provides two endpoints: "/CreateNewAccessCode" and "/ValidateAccessCode".
 
-- **App.js**: this is a login page, includes 2 main functions (requestOTP and verifyOTP). "requestOTP" is used to send sms to user's phone number and "verifyOTP" is used to check if user input same OTP as Firebase sent.
-- **App.css**: styles for App.js.
-- **firebase.js**: SDK setup and configuration for Firebase.
+- **myapp**:
+> **App.js**: this is a login page, includes 2 main functions (handleSubmit and handleValidate). "handleSubmit" is used to call *generate random access code, save phoneNumber + accessCode to database* and "handleValidate" is used to *check if user input the same Access Code as text to phoneNumber*.
 
-![image](https://user-images.githubusercontent.com/90604968/216816216-7e09594b-1e88-4ff3-830a-1d2f9ed72693.png)
+> **App.css**: styles for App.js.
+
+> **firebase.js**: SDK setup and configuration for Firebase.
+
+![image](https://user-images.githubusercontent.com/90604968/217428410-1469d301-af06-4171-a847-8086124f79d2.png)
 
 ## Installation
 - Clone the project: https://github.com/MiQannn/SKIPLI.git 
-- Direct to folder "myapp" and install some dependencies
+- Direct to folder "backend" and install Express JS + Twilio API:
+```
+npm install express
+npm install Twilio
+```
+- To run server, use command:
+```
+npm run dev
+```
+- Direct to folder "myapp" and install npm packages + Firebase:
 ```
 npm install
-npm install firebase --save
+npm install firebase
 ```
-- To run project, use command
+
+- To run the project, use command (__*must run folder backend first!*__):
 ```
 npm start
 ```
 
 ### Result
-**1/ Login Page**
+**Login Page**
 
 
-![image](https://user-images.githubusercontent.com/90604968/216816591-610745ed-8fbf-4fed-83ae-92f1630785f5.png)
-
-**2/ User input phone number and press button, if user input correct OTP, there will be an successful alert.**
-
-
-![image](https://user-images.githubusercontent.com/90604968/216817040-379927e2-f7e9-40cc-8ad8-6c1a867895c1.png)
+![image](https://user-images.githubusercontent.com/90604968/217432070-94ff0073-6e41-47dc-909d-1e705cae561c.png)
 
 
