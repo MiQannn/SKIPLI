@@ -1,90 +1,119 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import {  ref, child, set, push } from "firebase/database";
+import database from "./firebase";
 import './App.css';
-import { authentication } from './firebase';
-import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 
-function App() {
 
-  const defaultCountry = "+84";
-  
-  const [phoneNumb, setPhoneNumb] = useState(defaultCountry);
-  const [expandForm, setExpandForm] = useState(false);
-  const [otp, setOTP] = useState('');
-  
-  const generateRecaptcha = () => {
-    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-      'size': 'invisible',
-      'callback': (response) => {
-      // reCAPTCHA solved, allow signInWithPhoneNumber.
-    }
-    }, authentication);
-  }
 
-  const requestOTP = (e) => {
-    e.preventDefault();
-    if(phoneNumb.length >= 12) {
-      setExpandForm(true);
-      generateRecaptcha();
-      let appVerifier = window.recaptchaVerifier;
-      signInWithPhoneNumber(authentication, phoneNumb, appVerifier)
-      .then(confirmationResult => {
-        window.confirmationResult = confirmationResult;
-      }).catch((error) => {
-        // Error; SMS not sent
-        // ...
-        console.log(error);
+const App = () => {
+
+  const dbRef = ref(database, 'users');
+  const defaultCoutry = "+84";
+
+  // const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  // const authToken = process.env.TWILIO_AUTH_TOKEN;
+  // const client = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+  const list = push(dbRef);
+  const [phoneNumber, setPhoneNumber] = useState(defaultCoutry);
+  const [accessCode, setAccessCode] = useState('');
+
+  const handlePhoneNumberChange = (event) => {
+    setPhoneNumber(event.target.value);
+  };
+
+  const handleAccessCodeChange = (event) => {
+    setAccessCode(event.target.value);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if(phoneNumber.length >= 12) {
+
+    try {
+      const response = await fetch('http://localhost:8000/CreateNewAccessCode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber }),
       });
+      const { accessCode } = await response.json();
+
+      //Save data to firebase database
+      console.log(phoneNumber, accessCode)
+      set(child(list, 'users'),{
+        phoneNumber: phoneNumber ,
+        accessCode: accessCode,
+      });
+
+    } catch (error) {
+      console.error(error);
     }
+  }
+  else {
+    alert("Please input correct phone number!")
   }
 
-  const verifyOTP = (e) => {
-    let OTP = e.target.value;
-    setOTP(OTP);
-    if (OTP.length === 6){
-      let confirmationResult = window.confirmationResult;
-      confirmationResult.confirm(OTP).then((result) => {
-        // User signed in successfully.
-        const user = result.user;
-        console.log(JSON.stringify(user))
-        alert("Success login!")
-        // ...
-      }).catch((error) => {
-        // User couldn't sign in (bad verification code?)
-        // ...
-        console.log("Error")
+};
+
+  const handleValidate = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await fetch('http://localhost:8000/ValidateAccessCode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber, accessCode }),
       });
-      
+      const { success } = await response.json();
+      if (success) {
+        setAccessCode('');
+        alert('Login success!');
+      } else {
+        alert('Wrong Access Code!');
+      }
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   return (
-    <div className="form-container">
-      <form onSubmit={requestOTP}>
-        <h1 className='title'>Login with Phone Number</h1>
-        <div className='mb-3'>
-          <label htmlFor='phoneNumbInput' className='form-label'>Phone Number</label>
-          <input type="tel" className='form-control' id='phoneNumbInput' value={phoneNumb} onChange={(e)=>setPhoneNumb(e.target.value)}/>
-          
-        </div>
-        {expandForm === true?
-        <>
-        <div className='mb-3'>
-        <label htmlFor='OTPInput' className='form-label'>OTP</label>
-        <input placeholder='Enter OTP' type='number' className='form-control' id='OTPInput' value={otp} onChange={verifyOTP}/>
-        </div>
-        </>  
-        :
-        null
-      }
-      {expandForm === false?
-      <button type='submit' className='btn btn-primary'>Request OTP</button>
-      :
-      null
-    }
-    <div id='recaptcha-container'></div>
-      </form>
+    <div>
+    <form className="form-container">
+      <h1 className='title'>Login with Phone Number</h1>
+      <div className="contain">
+        <label className='label' htmlFor="phone-number">Phone Number:</label>
+        <input
+          className='form-control'
+          id="phone-number"
+          type="tel"
+          value={phoneNumber}
+          onChange={handlePhoneNumberChange}
+        />
+      </div>
+      <button className='btn' type="submit" onClick={handleSubmit}>
+        Generate Access Code
+      </button>
+      <div className="contain">
+        <label className='label' htmlFor="access-code">Access Code:</label>
+        <input
+          placeholder = 'Input access code here'
+          className='form-control'
+          id="access-code"
+          type="text"
+          value={accessCode}
+          onChange={handleAccessCodeChange}
+        />
+      </div>
+      <button className='btn' type="submit" onClick={handleValidate}>
+        Validate Access Code
+      </button>
+    </form>
     </div>
   );
-}
+};
 
 export default App;
+
