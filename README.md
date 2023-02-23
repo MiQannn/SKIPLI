@@ -35,9 +35,6 @@ npm start
 ```
 
 ### Result
-**Login Page**
 
-
-![image](https://user-images.githubusercontent.com/90604968/217432070-94ff0073-6e41-47dc-909d-1e705cae561c.png)
-
+https://user-images.githubusercontent.com/90604968/220959288-69fe3385-a9d5-4fc8-9277-27426c7a8280.mp4
 
